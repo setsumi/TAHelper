@@ -1,0 +1,37 @@
+1.1.5.2
+* Fixed: "Separate name" option removed name instead of separation if corresponding replacement string is not present.
+
+1.1.5.1
+* Fast loading of big names files.
+* Names text autoformatting now the same as in TAHPlugin
+
+1.1.5.0
+* Change: Clipboard locale now forced to Japanese by default. To avoid this behaviour, change parameter CRforceJpnClipbrdLocale from 1 to 0 in TAHelper.ini
+* Added option to send previous phrase instead of last one (Shift in time)
+
+1.1.4.9
+* Force-redraw option now also works when Clipboard Reviser is turned off (utilizes TAHplugin for that)
+
+1.1.4.8
+* Added option to force-redraw detached windows (ON by default) in TAHelper.ini
+
+1.1.4.7 r2
+* Name of last used configuration is now stored in .ini file instead of registry to allow multiple copies of TAHelper run without configuration conflicts.
+
+1.1.4.7
+* Added support for patched version of WaKan 1.67 (Attached below. Removed confirmation and progress popups to reduce flickering and improve speed).
+* Added hotkey to show/hide WaKan.
+* "Floating Mouse Wheel" now additionally affects any simple edit boxes.
+* "Detaching" the window also removes menu if window have one.
+* Added SYSTRAN option to get text from TA instead of clipboard (TAHplugin required)
+* Regex errors displayed in text instead of MessageBox
+
+1.1.4.6
+* Added support for WaKan 1.67 as Japanese text parser.
+* Added options to hide lower panels (RightClick->View Panels).
+* Added several hotkeys.
+
+1.1.4.5
+* Fixed function and default initialization of "Autohide Taskbar" option.
+* Added hotkey to toggle Clipboard Reviser active.
+* Added hotkey to display hotkeys help.

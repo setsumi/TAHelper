@@ -1,0 +1,60 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{6ECA30D4-7F18-4D8A-947E-E2A7EF3C46C2}</ProjectGuid>
+		</PropertyGroup>
+		<ItemGroup>
+			<Projects Include="TAHelper2009\TAHelper.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="TAHWKhook\TAHWKhook.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="TAHplugin\TAHplugin.cbproj">
+				<Dependencies/>
+			</Projects>
+		</ItemGroup>
+		<ProjectExtensions>
+			<Borland.Personality>Default.Personality.12</Borland.Personality>
+			<Borland.ProjectType/>
+			<BorlandProject>
+				<Default.Personality/>
+			</BorlandProject>
+		</ProjectExtensions>
+		<Target Name="TAHelper">
+			<MSBuild Projects="TAHelper2009\TAHelper.cbproj"/>
+		</Target>
+		<Target Name="TAHelper:Clean">
+			<MSBuild Targets="Clean" Projects="TAHelper2009\TAHelper.cbproj"/>
+		</Target>
+		<Target Name="TAHelper:Make">
+			<MSBuild Targets="Make" Projects="TAHelper2009\TAHelper.cbproj"/>
+		</Target>
+		<Target Name="TAHWKhook">
+			<MSBuild Projects="TAHWKhook\TAHWKhook.cbproj"/>
+		</Target>
+		<Target Name="TAHWKhook:Clean">
+			<MSBuild Targets="Clean" Projects="TAHWKhook\TAHWKhook.cbproj"/>
+		</Target>
+		<Target Name="TAHWKhook:Make">
+			<MSBuild Targets="Make" Projects="TAHWKhook\TAHWKhook.cbproj"/>
+		</Target>
+		<Target Name="TAHplugin">
+			<MSBuild Projects="TAHplugin\TAHplugin.cbproj"/>
+		</Target>
+		<Target Name="TAHplugin:Clean">
+			<MSBuild Targets="Clean" Projects="TAHplugin\TAHplugin.cbproj"/>
+		</Target>
+		<Target Name="TAHplugin:Make">
+			<MSBuild Targets="Make" Projects="TAHplugin\TAHplugin.cbproj"/>
+		</Target>
+		<Target Name="Build">
+			<CallTarget Targets="TAHelper;TAHWKhook;TAHplugin"/>
+		</Target>
+		<Target Name="Clean">
+			<CallTarget Targets="TAHelper:Clean;TAHWKhook:Clean;TAHplugin:Clean"/>
+		</Target>
+		<Target Name="Make">
+			<CallTarget Targets="TAHelper:Make;TAHWKhook:Make;TAHplugin:Make"/>
+		</Target>
+		<Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+	</Project>

@@ -1,0 +1,19 @@
+0.0.0.7
+* Added option to popup TA on translation.(RightClick tray icon -> Options)
+* Fix: Checkboxes not updated properly in substitutions window.
+* Fix: Configuration not saved until TA is closed.
+
+0.0.0.6
+* Removed [text] and [regex] tags.
+* Each [TEXT] block now internally sorted by length, so order of entries is not matter.
+* Added profiles support.
+* Overall fixes and improvements.
+
+0.0.0.2
+* Added preliminary version of GUI.
+* Changed location of replacements profiles.
+
+0.0.0.1
+* Initial version. Requires Translation Aggregator 0.3.5 or higher.
+* Provides support for SYSTRAN's option to get text from TA in TAHelper.
+* Global relpacements function. TAHelper is not related. See included names.txt file.

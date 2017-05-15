@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2010/03/20 12:58:27.437.cpp,F:\MAIN\BC\TAHelper2009\Unit2.cpp=F:\MAIN\BC\TAHelper2009\UnitOSD.cpp</Transaction>
+    <Transaction>2010/03/20 12:58:27.437.h,F:\MAIN\BC\TAHelper2009\Unit2.h=F:\MAIN\BC\TAHelper2009\UnitOSD.h</Transaction>
+    <Transaction>2010/03/20 12:58:27.437.dfm,F:\MAIN\BC\TAHelper2009\Unit2.dfm=F:\MAIN\BC\TAHelper2009\UnitOSD.dfm</Transaction>
+    <Transaction>2010/04/03 07:16:22.046.cpp,F:\MAIN\BC\TAHelper2009\WindowUtils.cpp=</Transaction>
+  </Transactions>
+</BorlandProject>
