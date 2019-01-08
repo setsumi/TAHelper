@@ -59,40 +59,40 @@
 			<TASM_Debugging>None</TASM_Debugging>
 		</PropertyGroup>
 		<ItemGroup>
-			<None Include="TAPlugin.h">
-				<BuildOrder>1</BuildOrder>
-			</None>
-			<ResFiles Include="TAHplugin.res">
-				<BuildOrder>2</BuildOrder>
-			</ResFiles>
-			<CppCompile Include="UnitOptions.cpp">
-				<Form>FormOptions</Form>
-				<DependentOn>UnitOptions.h</DependentOn>
-				<BuildOrder>7</BuildOrder>
-			</CppCompile>
-			<CppCompile Include="..\TAHelper2009\WindowUtils.cpp">
-				<DependentOn>..\TAHelper2009\WindowUtils.h</DependentOn>
-				<BuildOrder>3</BuildOrder>
+			<CppCompile Include="StringUtils.cpp">
+				<DependentOn>StringUtils.h</DependentOn>
+				<BuildOrder>4</BuildOrder>
 			</CppCompile>
 			<CppCompile Include="UnitSubst.cpp">
 				<Form>FormTAHsubst</Form>
 				<DependentOn>UnitSubst.h</DependentOn>
 				<BuildOrder>5</BuildOrder>
 			</CppCompile>
-			<CppCompile Include="StringUtils.cpp">
-				<DependentOn>StringUtils.h</DependentOn>
-				<BuildOrder>4</BuildOrder>
+			<CppCompile Include="Utils.cpp">
+				<DependentOn>Utils.h</DependentOn>
+				<BuildOrder>6</BuildOrder>
 			</CppCompile>
 			<CppCompile Include="File1.cpp">
 				<DependentOn>File1.h</DependentOn>
 				<BuildOrder>3</BuildOrder>
 			</CppCompile>
-			<CppCompile Include="Utils.cpp">
-				<DependentOn>Utils.h</DependentOn>
-				<BuildOrder>6</BuildOrder>
+			<ResFiles Include="TAHplugin.res">
+				<BuildOrder>2</BuildOrder>
+			</ResFiles>
+			<None Include="TAPlugin.h">
+				<BuildOrder>1</BuildOrder>
+			</None>
+			<CppCompile Include="..\TAHelper2009\WindowUtils.cpp">
+				<DependentOn>..\TAHelper2009\WindowUtils.h</DependentOn>
+				<BuildOrder>3</BuildOrder>
 			</CppCompile>
-			<FormResources Include="UnitOptions.dfm"/>
+			<CppCompile Include="UnitOptions.cpp">
+				<Form>FormOptions</Form>
+				<DependentOn>UnitOptions.h</DependentOn>
+				<BuildOrder>7</BuildOrder>
+			</CppCompile>
 			<FormResources Include="UnitSubst.dfm"/>
+			<FormResources Include="UnitOptions.dfm"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>

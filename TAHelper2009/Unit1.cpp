@@ -4,6 +4,7 @@
 
 #include <Registry.hpp>
 #include <boost/regex.hpp>
+#include <tlhelp32.h>
 #include "Unit1.h"
 #include "UnitOSD.h"
 #include "StringUtils.h"
@@ -199,6 +200,42 @@ LRESULT CALLBACK HookMouseProc(int nCode,	WPARAM wParam, LPARAM lParam)
 	}
 	// Call next hook
 	return CallNextHookEx(FormTAHelper->m_hMouseHook, nCode, wParam, lParam);
+}
+
+//---------------------------------------------------------------------------
+void TerminateProcess(HWND hWnd)
+{
+	HANDLE hProc = NULL;
+	DWORD procID = NULL;
+
+	if (!GetWindowThreadProcessId(hWnd, &procID)) {
+		throw Exception(L"TerminateProcess(HWND) Get window process ID failed");
+	}
+
+	if (procID)
+		hProc = OpenProcess(PROCESS_TERMINATE, FALSE, procID);
+	if (!hProc) {
+		throw Exception(L"TerminateProcess(HWND) Can not open process");
+	}
+
+	if (!TerminateProcess(hProc, 0)) {
+		throw Exception(L"TerminateProcess(HWND) Can not terminate process");
+	}
+
+	// cleanup
+	if (hWnd)  CloseHandle(hWnd);
+	if (hProc) CloseHandle(hProc);
+}
+void TerminateProcess(DWORD procID)
+{
+	HANDLE hProc = OpenProcess(PROCESS_TERMINATE, FALSE, procID);
+	if (!hProc) {
+		throw Exception(L"TerminateProcess(DWORD) Can not open process");
+	}
+	if (!TerminateProcess(hProc, 0)) {
+		throw Exception(L"TerminateProcess(DWORD) Can not terminate process");
+	}
+	if (hProc) CloseHandle(hProc);
 }
 
 //---------------------------------------------------------------------------
@@ -420,6 +457,9 @@ void __fastcall TFormTAHelper::WndProc(Messages::TMessage &Message)
 
 			// get clipboard text to process
 			tWString s(GetClipboard(Handle));
+
+			//block large text
+			if(s.Length() > m_OptionsGlobal.CRtextVolumeLimit) return;
 
 			// block self-triggered clipboard event
 			// (text is no raw but was processed and copied by me)
@@ -940,12 +980,14 @@ void TFormTAHelper::UpdateOptions(bool store)
 		m_Options.MMviewPanelTA							= PopupMenuForm->Items->Items[9]->Items[1]->Checked?1:0;
 		m_Options.MMviewPanelHK							= PopupMenuForm->Items->Items[9]->Items[2]->Checked?1:0;
 		m_Options.MMviewPanelWD							= PopupMenuForm->Items->Items[9]->Items[3]->Checked?1:0;
+		m_Options.MMtaskbarVisible          = ToggleTaskbarVisibility1->Checked?1:0;
 
 		m_Options.WKenable									= CheckBoxWKenable->Checked?1:0;
 		m_Options.WKcompact									= CheckBoxWKcompact->Checked?1:0;
 		m_Options.WKpatched									= CheckBoxWKpatched->Checked?1:0;
 
 		m_Options.STRtextFromTA							= CheckBoxSTRtextFromTA->Checked?1:0;
+		m_Options.TARestartOnHang           = CheckBoxTARestartOnHang->Checked?1:0;
 
 	} else { // restore state from struct
 		if(m_Options.Left || m_Options.Top || m_Options.Width || m_Options.Height) {
@@ -991,6 +1033,8 @@ void TFormTAHelper::UpdateOptions(bool store)
 		PopupMenuForm->Items->Items[6]->Items[3]->Checked	= (m_Options.MMsafeMode == 1);
 		PopupMenuForm->Items->Items[7]->Checked						= (m_Options.MMautohideTaskbar == 1);
 		AutohideTaskbar1Click(PopupMenuForm->Items->Items[7]);
+		ToggleTaskbarVisibility1->Checked                 = (m_Options.MMtaskbarVisible == 1);
+		ToggleTaskbarVisibility1Click((TObject*)1);
 		PopupMenuForm->Items->Items[9]->Items[0]->Checked	= (m_Options.MMviewPanelWK == 1);
 		PopupMenuForm->Items->Items[9]->Items[1]->Checked	= (m_Options.MMviewPanelTA == 1);
 		PopupMenuForm->Items->Items[9]->Items[2]->Checked	= (m_Options.MMviewPanelHK == 1);
@@ -1002,6 +1046,7 @@ void TFormTAHelper::UpdateOptions(bool store)
 		CheckBoxWKpatched->Checked	= (m_Options.WKpatched == 1);
 
 		CheckBoxSTRtextFromTA->Checked = (m_Options.STRtextFromTA == 1);
+		CheckBoxTARestartOnHang->Checked = (m_Options.TARestartOnHang == 1);
 	}
 }
 //---------------------------------------------------------------------------
@@ -1080,6 +1125,7 @@ void TFormTAHelper::SaveOptions(UnicodeString file)
 		ini->WriteInteger(L"MainMenu", L"MMviewPanelTA", m_Options.MMviewPanelTA);
 		ini->WriteInteger(L"MainMenu", L"MMviewPanelHK", m_Options.MMviewPanelHK);
 		ini->WriteInteger(L"MainMenu", L"MMviewPanelWD", m_Options.MMviewPanelWD);
+		ini->WriteInteger(L"MainMenu", L"MMtaskbarVisible", m_Options.MMtaskbarVisible);
 
 		ini->WriteInteger(L"WaKan", L"WKenable", m_Options.WKenable);
 		ini->WriteInteger(L"WaKan", L"WKcompact", m_Options.WKcompact);
@@ -1087,6 +1133,7 @@ void TFormTAHelper::SaveOptions(UnicodeString file)
 		ini->WriteInteger(L"WaKan", L"WKpatched", m_Options.WKpatched);
 
 		ini->WriteInteger(L"Systran", L"STRtextFromTA", m_Options.STRtextFromTA);
+		ini->WriteInteger(L"TA", L"TARestartOnHang", m_Options.TARestartOnHang);
 		// close file
 		delete ini;
 		UpdateConfigFileValue(file);
@@ -1163,6 +1210,7 @@ void TFormTAHelper::LoadOptions(UnicodeString file)
 			m_Options.MMviewPanelTA				= ini->ReadInteger(L"MainMenu", L"MMviewPanelTA", 1);
 			m_Options.MMviewPanelHK				= ini->ReadInteger(L"MainMenu", L"MMviewPanelHK", 1);
 			m_Options.MMviewPanelWD				= ini->ReadInteger(L"MainMenu", L"MMviewPanelWD", 1);
+			m_Options.MMtaskbarVisible    = ini->ReadInteger(L"MainMenu", L"MMtaskbarVisible", 1);
 
 			m_Options.WKenable	= ini->ReadInteger(L"WaKan", L"WKenable", 0);
 			m_Options.WKcompact	= ini->ReadInteger(L"WaKan", L"WKcompact", 0);
@@ -1170,6 +1218,7 @@ void TFormTAHelper::LoadOptions(UnicodeString file)
 			m_Options.WKpatched	= ini->ReadInteger(L"WaKan", L"WKpatched", 0);
 
 			m_Options.STRtextFromTA = ini->ReadInteger(L"Systran", L"STRtextFromTA", 1);
+			m_Options.TARestartOnHang = ini->ReadInteger(L"TA", L"TARestartOnHang", 0);
 			// close ini file
 			delete ini;
 			StatusbarError(L"Configuration loaded", 2);
@@ -1292,6 +1341,7 @@ void TFormTAHelper::SaveOptionsGlobal()
 	ini->WriteInteger(L"WindowDetacher", L"WDforceRedraw", m_OptionsGlobal.WDforceRedraw);
 	ini->WriteInteger(L"WindowDetacher", L"WDredrawDelay", m_OptionsGlobal.WDredrawDelay);
 	ini->WriteInteger(L"ClipboardReviser", L"CRforceJpnClipbrdLocale", m_OptionsGlobal.CRforceJpnClipbrdLocale);
+	ini->WriteInteger(L"ClipboardReviser", L"CRtextVolumeLimit", m_OptionsGlobal.CRtextVolumeLimit);
 	delete ini;
 }
 //---------------------------------------------------------------------------
@@ -1302,6 +1352,7 @@ void TFormTAHelper::LoadOptionsGlobal()
 	m_OptionsGlobal.WDredrawDelay = ini->ReadInteger(L"WindowDetacher", L"WDredrawDelay", 200);
 	TimerWDredraw->Interval = m_OptionsGlobal.WDredrawDelay;
 	m_OptionsGlobal.CRforceJpnClipbrdLocale = ini->ReadInteger(L"ClipboardReviser", L"CRforceJpnClipbrdLocale", 1);
+	m_OptionsGlobal.CRtextVolumeLimit = ini->ReadInteger(L"ClipboardReviser", L"CRtextVolumeLimit", 1024);
 	delete ini;
 }
 //---------------------------------------------------------------------------
@@ -1361,13 +1412,14 @@ void __fastcall TFormTAHelper::FormClose(TObject *Sender,
 		CheckBoxHKenableClick(this);
 	}
 
-	// restore autohide state of taskbar
-	SetAutohideTaskbar(m_AutohideTaskbar);
-
 	// show TA if was hidden
 	HWND taw = TALFind();
 	if (taw && !IsWindowVisible(taw))
 		ShowWindow(taw, SW_SHOW);
+
+	// restore autohide state of taskbar
+	ToggleTaskbarVisibility1Click(NULL);
+	SetAutohideTaskbar(m_AutohideTaskbar);
 
 	// clear and delete names list
 	ClearNameList();
@@ -1492,6 +1544,64 @@ HWND TFormTAHelper::TALFind(bool forcefind, bool notimer)
 	if (hw != NULL && hw != hw0) RefreshClipboardMonitor();
 	if (forcefind || hw != hw0) TALResult(hw); // assign and display result
 
+	// terminate TA if hung/crash
+	if (CheckBoxTARestartOnHang->Checked && hw != NULL && hw == hw0) {
+		if (IsHungAppWindow(hw)) {
+			DWORD procID = NULL;
+			HANDLE hProcSnap = NULL;
+			PROCESSENTRY32 pe32;
+			pe32.dwSize = sizeof(PROCESSENTRY32);
+
+			GetWindowThreadProcessId(hw, &procID);
+			if (procID) {
+				TStringList *pChildren = new TStringList();
+				pChildren->Sorted = true;
+				pChildren->Duplicates = dupIgnore;
+
+				// terminate direct child processes
+				hProcSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+				if (hProcSnap == INVALID_HANDLE_VALUE) {
+					throw Exception(L"TFormTAHelper::TALFind(#1) => CreateToolhelp32Snapshot() failed");
+				}
+				if (!Process32First(hProcSnap, &pe32)) {
+					CloseHandle(hProcSnap);
+					throw Exception(L"TFormTAHelper::TALFind(#1) => Process32First() failed");
+				}
+				do {
+					if (pe32.th32ParentProcessID == procID) {
+						pChildren->Add(pe32.szExeFile);
+						TerminateProcess(pe32.th32ProcessID);
+					}
+				} while (Process32Next(hProcSnap, &pe32));
+				CloseHandle(hProcSnap);
+
+				// terminate another spawns of child processes
+				hProcSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+				if (hProcSnap == INVALID_HANDLE_VALUE) {
+					throw Exception(L"TFormTAHelper::TALFind(#2) => CreateToolhelp32Snapshot() failed");
+				}
+				if (!Process32First(hProcSnap, &pe32)) {
+					CloseHandle(hProcSnap);
+					throw Exception(L"TFormTAHelper::TALFind(#2) => Process32First() failed");
+				}
+				do {
+					if (pChildren->IndexOf(pe32.szExeFile) > -1) {
+						TerminateProcess(pe32.th32ProcessID);
+					}
+				} while (Process32Next(hProcSnap, &pe32));
+				CloseHandle(hProcSnap);
+				delete pChildren;
+
+				// terminate TA process
+				CloseHandle(hw);
+				TerminateProcess(procID);
+			}
+		}
+	}
+
+	// Suppress Taskbar reappearance by itself despite being set to invisible
+	ToggleTaskbarVisibility1Click((TObject*)1);
+
 	if (!notimer) TimerTALcheck->Enabled = true;
 	return hw;
 }
@@ -1501,12 +1611,12 @@ void TFormTAHelper::STRFind()
 	if (m_Systran->FindToolbar()) {
 		if (LabelSTRstatus->Font->Color != clGreen) {
 			LabelSTRstatus->Font->Color = clGreen;
-			LabelSTRstatus->Caption = L"Hooked with SYSTRAN.";
+			LabelSTRstatus->Caption = L"Hooked with SYSTRAN";
 		}
 	} else {
 		if (LabelSTRstatus->Font->Color != clRed) {
 			LabelSTRstatus->Font->Color = clRed;
-			LabelSTRstatus->Caption = L"Please, run Translation Toolbar.";
+			LabelSTRstatus->Caption = L"Please run Translation Toolbar";
 		}
 	}
 }
@@ -1517,12 +1627,12 @@ void TFormTAHelper::WKFind()
 	if (m_Wakan->DllControl(Handle)) {
 		if (LabelWKstatus->Font->Color != clGreen) {
 			LabelWKstatus->Font->Color = clGreen;
-			LabelWKstatus->Caption = L"Hooked with WaKan.";
+			LabelWKstatus->Caption = L"Hooked with WaKan";
 		}
 	} else {
 		if (LabelWKstatus->Font->Color != clRed) {
 			LabelWKstatus->Font->Color = clRed;
-			LabelWKstatus->Caption = L"Please, run WaKan.";
+			LabelWKstatus->Caption = L"Please run WaKan";
 		}
 	}
 }
@@ -1531,10 +1641,10 @@ void TFormTAHelper::TALResult(HWND hw)
 {
 	if(hw != NULL) {
 		LabelTALstatus->Font->Color = clGreen;
-		LabelTALstatus->Caption = L"Hooked with Translation Aggregator.";
+		LabelTALstatus->Caption = L"Translation Aggregator is active";
 	} else {
 		LabelTALstatus->Font->Color = clRed;
-		LabelTALstatus->Caption = L"Please, run Translation Aggregator.";
+		LabelTALstatus->Caption = L"Please run Translation Aggregator";
 	}
 	// store TA handle
 	LabelTALstatus->Tag = (int)hw;
@@ -1982,15 +2092,15 @@ void __fastcall TFormTAHelper::SpeedButtonCRcopyClick(TObject *Sender)
 {
 	// copy displayed text
 	UnicodeString text(MemoGetText(MemoCRcontents));
-	if(text.Length()) {
+//	if(text.Length()) {
 		SpeedButtonCRcopy->Tag = 1;
 		if(!CopyToClipboard(text.w_str(), Handle)) {
 			SpeedButtonCRcopy->Tag = 0;
 			StatusbarError(L"Copy failed");
 		}
-	} else {
-		StatusbarError(L"No text to copy");
-	}
+//	} else {
+//		StatusbarError(L"No text to copy");
+//	}
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormTAHelper::TimerAnimeTimer(TObject *Sender)
@@ -2690,6 +2800,29 @@ void __fastcall TFormTAHelper::TimerWDredrawTimer(TObject *Sender)
 		HWND hw = (HWND)m_StrayWinList->Items[i];
 		if (IsWindow(hw)) {
 			SetWindowPos(hw, HWND_NOTOPMOST, 0,0,0,0, SWP_NOACTIVATE|SWP_NOMOVE|SWP_NOSIZE|SWP_NOCOPYBITS|SWP_FRAMECHANGED|SWP_ASYNCWINDOWPOS);
+		}
+	}
+}
+
+//---------------------------------------------------------------------------
+// Make Taskbar visible/invisible
+// Sender == 0 : called on application exit to force show
+// Sender == 1 : called from code to restore current state
+// Sender == TMenuItem : called on menu item click to toggle
+void __fastcall TFormTAHelper::ToggleTaskbarVisibility1Click(TObject *Sender)
+{
+	HWND hWnd = FindWindow(L"Shell_traywnd", NULL);
+	if (hWnd) {
+		if (!Sender) { // force show taskbar on exit
+			if (!IsWindowVisible(hWnd))
+				ShowWindow(hWnd, SW_SHOW);
+		} else {   // toggle taskbar visibility
+			if ((bool)IsWindowVisible(hWnd) != (bool)ToggleTaskbarVisibility1->Checked) {
+				ShowWindow(hWnd, ToggleTaskbarVisibility1->Checked? SW_SHOW : SW_HIDE);
+			}
+			// prevent TAHelper losing focus on taskbar appearance when menu item is clicked
+			if (Sender != (TObject*)1 && ToggleTaskbarVisibility1->Checked)
+				BringWindowToFront(Handle);
 		}
 	}
 }

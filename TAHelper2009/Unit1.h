@@ -53,11 +53,13 @@ struct tOptionsGlobal {
 	int WDforceRedraw;
 	int WDredrawDelay;
 	int CRforceJpnClipbrdLocale;
+	int CRtextVolumeLimit;
 
 	tOptionsGlobal() {
 		WDforceRedraw = 1;
 		WDredrawDelay = 200;
 		CRforceJpnClipbrdLocale = 1;
+		CRtextVolumeLimit = 1024;
 	}
 };
 //---------------------------------------------------------------------------
@@ -103,6 +105,7 @@ struct tOptions {
 	int MMviewPanelTA;
 	int MMviewPanelHK;
 	int MMviewPanelWD;
+	int MMtaskbarVisible;
 
 	int WKenable;
 	int WKcompact;
@@ -110,6 +113,7 @@ struct tOptions {
 	int WKpatched;
 
 	int STRtextFromTA;
+	int TARestartOnHang;
 
 	tOptions() {
 		Left = Top = 10;
@@ -154,6 +158,7 @@ struct tOptions {
 		MMviewPanelTA = 1;
 		MMviewPanelHK = 1;
 		MMviewPanelWD = 1;
+		MMtaskbarVisible = 1;
 
 		WKenable = 0;
 		WKcompact = 0;
@@ -161,6 +166,7 @@ struct tOptions {
 		WKpatched = 0;
 
 		STRtextFromTA = 1;
+		TARestartOnHang = 0;
 	}
 };
 //==================================================================
@@ -926,6 +932,9 @@ __published:	// IDE-managed Components
 	TEdit *EditCRtimeShift;
 	TUpDown *UpDownCRtimeShift;
 	TLabel *LabelCRtimeShift;
+	TCheckBox *CheckBoxTARestartOnHang;
+	TMenuItem *N5;
+	TMenuItem *ToggleTaskbarVisibility1;
 	void __fastcall CheckBoxCRenableClick(TObject *Sender);
 	void __fastcall CheckBoxFSenableClick(TObject *Sender);
 	void __fastcall SpeedButtonTopmostClick(TObject *Sender);
@@ -996,6 +1005,7 @@ __published:	// IDE-managed Components
 	void __fastcall TimerWKclassTimer(TObject *Sender);
 	void __fastcall WaKan1Click(TObject *Sender);
 	void __fastcall TimerWDredrawTimer(TObject *Sender);
+	void __fastcall ToggleTaskbarVisibility1Click(TObject *Sender);
 
 private:	// User declarations
 public:		// User declarations

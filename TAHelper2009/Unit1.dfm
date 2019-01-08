@@ -1590,6 +1590,15 @@ object FormTAHelper: TFormTAHelper
       Height = 13
       Caption = 'LabelTALstatus'
     end
+    object CheckBoxTARestartOnHang: TCheckBox
+      Left = 174
+      Top = 11
+      Width = 97
+      Height = 17
+      Hint = 'Monitor TA responsiveness and restart if hanged'
+      Caption = ' '
+      TabOrder = 0
+    end
   end
   object StatusBar1: TStatusBar
     Left = 0
@@ -1967,6 +1976,15 @@ object FormTAHelper: TFormTAHelper
         Checked = True
         OnClick = WaKan1Click
       end
+    end
+    object N5: TMenuItem
+      Caption = '-'
+    end
+    object ToggleTaskbarVisibility1: TMenuItem
+      AutoCheck = True
+      Caption = 'Toggle Taskbar Visibility'
+      Hint = 'Make Windows Taskbar invisible or visible again'
+      OnClick = ToggleTaskbarVisibility1Click
     end
   end
   object OpenDialog1: TOpenDialog

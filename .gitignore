@@ -1,15 +1,14 @@
-# Compiled Object files
-*.obj
+# Intermediate Build files
+/**/*.gch
+/**/*.map
+/**/*.obj
+/**/*.pch
+/**/*.tds
 
-# Precompiled Headers
-*.gch
-*.pch
+/**/*.~*
+/**/*.#*
 
-# Compiled Dynamic libraries
-*.dll
-
-# Compiled Static libraries
-*.lib
-
-# Executables
-*.exe
+# Output files
+/**/*.dll
+/**/*.lib
+/**/*.exe
