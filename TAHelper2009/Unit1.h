@@ -1027,6 +1027,7 @@ public:		// User declarations
 	int m_AutohideTaskbar;
 	tWakan *m_Wakan;
 	HWND m_hBackgroundCover;
+	UnicodeString m_TAexe;
 
 	void ClearNameList();
   void LoadNames(bool global);

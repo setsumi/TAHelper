@@ -59,21 +59,21 @@
 			<TASM_Debugging>None</TASM_Debugging>
 		</PropertyGroup>
 		<ItemGroup>
-			<DefFile Include="Shared.def">
-				<BuildOrder>3</BuildOrder>
-			</DefFile>
-			<None Include="Header.h">
-				<BuildOrder>4</BuildOrder>
-			</None>
-			<CppCompile Include="File2.cpp">
-				<BuildOrder>2</BuildOrder>
-			</CppCompile>
 			<CppCompile Include="File1.cpp">
 				<BuildOrder>0</BuildOrder>
 			</CppCompile>
 			<ResFiles Include="TAHWKhook.res">
 				<BuildOrder>1</BuildOrder>
 			</ResFiles>
+			<CppCompile Include="File2.cpp">
+				<BuildOrder>2</BuildOrder>
+			</CppCompile>
+			<DefFile Include="Shared.def">
+				<BuildOrder>3</BuildOrder>
+			</DefFile>
+			<None Include="Header.h">
+				<BuildOrder>4</BuildOrder>
+			</None>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>

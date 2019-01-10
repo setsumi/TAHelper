@@ -5,6 +5,8 @@
 #include <Registry.hpp>
 #include <boost/regex.hpp>
 #include <tlhelp32.h>
+#include <psapi.h>
+
 #include "Unit1.h"
 #include "UnitOSD.h"
 #include "StringUtils.h"
@@ -1544,57 +1546,43 @@ HWND TFormTAHelper::TALFind(bool forcefind, bool notimer)
 	if (hw != NULL && hw != hw0) RefreshClipboardMonitor();
 	if (forcefind || hw != hw0) TALResult(hw); // assign and display result
 
-	// terminate TA if hung/crash
-	if (CheckBoxTARestartOnHang->Checked && hw != NULL && hw == hw0) {
-		if (IsHungAppWindow(hw)) {
-			DWORD procID = NULL;
-			HANDLE hProcSnap = NULL;
-			PROCESSENTRY32 pe32;
-			pe32.dwSize = sizeof(PROCESSENTRY32);
-
-			GetWindowThreadProcessId(hw, &procID);
-			if (procID) {
-				TStringList *pChildren = new TStringList();
-				pChildren->Sorted = true;
-				pChildren->Duplicates = dupIgnore;
-
-				// terminate direct child processes
-				hProcSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-				if (hProcSnap == INVALID_HANDLE_VALUE) {
-					throw Exception(L"TFormTAHelper::TALFind(#1) => CreateToolhelp32Snapshot() failed");
+	// monitor TA
+	if (CheckBoxTARestartOnHang->Checked) {
+		if (hw == NULL) {
+			if (!m_TAexe.IsEmpty()) { // restart on termination
+				UnicodeString tadir(ExtractFilePath(m_TAexe));
+				tadir = tadir.Delete(tadir.Length(), 1); // remove last separator
+				STARTUPINFO si;
+				PROCESS_INFORMATION pi;
+				ZeroMemory(&si, sizeof(si));
+				si.cb = sizeof(si);
+				ZeroMemory(&pi, sizeof(pi));
+				if (CreateProcess(m_TAexe.c_str(), NULL, NULL, NULL, FALSE, 0, NULL,
+						tadir.c_str(), &si, &pi)) {
+					CloseHandle(pi.hThread);
+					CloseHandle(pi.hProcess);
 				}
-				if (!Process32First(hProcSnap, &pe32)) {
-					CloseHandle(hProcSnap);
-					throw Exception(L"TFormTAHelper::TALFind(#1) => Process32First() failed");
-				}
-				do {
-					if (pe32.th32ParentProcessID == procID) {
-						pChildren->Add(pe32.szExeFile);
-						TerminateProcess(pe32.th32ProcessID);
+			}
+		} else {
+			if (IsHungAppWindow(hw)) { // terminate TA if hung
+				TerminateProcess(hw);
+			} else {
+				// store TA exe path
+				if (hw != hw0) {
+					DWORD processID = 0;
+					HANDLE processHandle = NULL;
+					TCHAR filename[MAX_PATH];
+
+					if (GetWindowThreadProcessId(hw, &processID)) {
+						processHandle = OpenProcess(PROCESS_QUERY_INFORMATION|PROCESS_VM_READ, FALSE, processID);
+						if (processHandle != NULL) {
+							if (GetModuleFileNameEx(processHandle, NULL, filename, MAX_PATH)) {
+								m_TAexe = filename;
+							}
+							CloseHandle(processHandle);
+						}
 					}
-				} while (Process32Next(hProcSnap, &pe32));
-				CloseHandle(hProcSnap);
-
-				// terminate another spawns of child processes
-				hProcSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-				if (hProcSnap == INVALID_HANDLE_VALUE) {
-					throw Exception(L"TFormTAHelper::TALFind(#2) => CreateToolhelp32Snapshot() failed");
 				}
-				if (!Process32First(hProcSnap, &pe32)) {
-					CloseHandle(hProcSnap);
-					throw Exception(L"TFormTAHelper::TALFind(#2) => Process32First() failed");
-				}
-				do {
-					if (pChildren->IndexOf(pe32.szExeFile) > -1) {
-						TerminateProcess(pe32.th32ProcessID);
-					}
-				} while (Process32Next(hProcSnap, &pe32));
-				CloseHandle(hProcSnap);
-				delete pChildren;
-
-				// terminate TA process
-				CloseHandle(hw);
-				TerminateProcess(procID);
 			}
 		}
 	}
@@ -1642,6 +1630,8 @@ void TFormTAHelper::TALResult(HWND hw)
 	if(hw != NULL) {
 		LabelTALstatus->Font->Color = clGreen;
 		LabelTALstatus->Caption = L"Translation Aggregator is active";
+		// restore positions of TA windows
+		FormTAHelper->TimerTALrefind->Enabled = true;
 	} else {
 		LabelTALstatus->Font->Color = clRed;
 		LabelTALstatus->Caption = L"Please run Translation Aggregator";

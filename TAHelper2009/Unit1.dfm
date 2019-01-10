@@ -1595,7 +1595,7 @@ object FormTAHelper: TFormTAHelper
       Top = 11
       Width = 97
       Height = 17
-      Hint = 'Monitor TA responsiveness and restart if hanged'
+      Hint = 'Restart Translation Aggregator if hanged or crashed'
       Caption = ' '
       TabOrder = 0
     end
