@@ -77,40 +77,40 @@
 			<BCC_OptimizeForSize>true</BCC_OptimizeForSize>
 		</PropertyGroup>
 		<ItemGroup>
-			<CppCompile Include="TAHelper.cpp">
-				<BuildOrder>-1</BuildOrder>
-				<BuildOrder>0</BuildOrder>
-			</CppCompile>
-			<ResFiles Include="TAHelper.res">
-				<BuildOrder>-1</BuildOrder>
-				<BuildOrder>1</BuildOrder>
-			</ResFiles>
-			<CppCompile Include="WindowUtils.cpp">
-				<DependentOn>WindowUtils.h</DependentOn>
-				<BuildOrder>7</BuildOrder>
-			</CppCompile>
-			<CppCompile Include="Wakan.cpp">
-				<DependentOn>Wakan.h</DependentOn>
-				<BuildOrder>6</BuildOrder>
-			</CppCompile>
-			<None Include="ModelSupport_TAHelper\default.txvpck"/>
-			<None Include="ModelSupport_TAHelper\default.txaPackage"/>
 			<CppCompile Include="Unit1.cpp">
 				<BuildOrder>2</BuildOrder>
 				<Form>FormTAHelper</Form>
 				<DependentOn>Unit1.h</DependentOn>
 				<BuildOrder>0</BuildOrder>
 			</CppCompile>
+			<None Include="ModelSupport_TAHelper\default.txaPackage"/>
 			<CppCompile Include="UnitOSD.cpp">
 				<Form>FormOSD</Form>
 				<DependentOn>UnitOSD.h</DependentOn>
 				<BuildOrder>5</BuildOrder>
 			</CppCompile>
+			<None Include="changelog.txt"/>
 			<CppCompile Include="..\TAHplugin\StringUtils.cpp">
 				<DependentOn>..\TAHplugin\StringUtils.h</DependentOn>
 				<BuildOrder>8</BuildOrder>
 			</CppCompile>
-			<None Include="changelog.txt"/>
+			<ResFiles Include="TAHelper.res">
+				<BuildOrder>-1</BuildOrder>
+				<BuildOrder>1</BuildOrder>
+			</ResFiles>
+			<CppCompile Include="TAHelper.cpp">
+				<BuildOrder>-1</BuildOrder>
+				<BuildOrder>0</BuildOrder>
+			</CppCompile>
+			<CppCompile Include="WindowUtils.cpp">
+				<DependentOn>WindowUtils.h</DependentOn>
+				<BuildOrder>7</BuildOrder>
+			</CppCompile>
+			<None Include="ModelSupport_TAHelper\default.txvpck"/>
+			<CppCompile Include="Wakan.cpp">
+				<DependentOn>Wakan.h</DependentOn>
+				<BuildOrder>6</BuildOrder>
+			</CppCompile>
 			<FormResources Include="Unit1.dfm"/>
 			<FormResources Include="UnitOSD.dfm"/>
 			<BuildConfiguration Include="Base">
@@ -137,7 +137,7 @@
 						<VersionInfo Name="MajorVer">1</VersionInfo>
 						<VersionInfo Name="MinorVer">1</VersionInfo>
 						<VersionInfo Name="Release">5</VersionInfo>
-						<VersionInfo Name="Build">5</VersionInfo>
+						<VersionInfo Name="Build">6</VersionInfo>
 						<VersionInfo Name="Debug">True</VersionInfo>
 						<VersionInfo Name="PreRelease">False</VersionInfo>
 						<VersionInfo Name="Special">False</VersionInfo>
@@ -149,7 +149,7 @@
 					<VersionInfoKeys>
 						<VersionInfoKeys Name="CompanyName"/>
 						<VersionInfoKeys Name="FileDescription">TAHelper by furniture</VersionInfoKeys>
-						<VersionInfoKeys Name="FileVersion">1.1.5.5</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">1.1.5.6</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName"/>
 						<VersionInfoKeys Name="LegalCopyright"/>
 						<VersionInfoKeys Name="LegalTrademarks"/>

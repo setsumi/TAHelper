@@ -1220,7 +1220,7 @@ void TFormTAHelper::LoadOptions(UnicodeString file)
 			m_Options.WKpatched	= ini->ReadInteger(L"WaKan", L"WKpatched", 0);
 
 			m_Options.STRtextFromTA = ini->ReadInteger(L"Systran", L"STRtextFromTA", 1);
-			m_Options.TARestartOnHang = ini->ReadInteger(L"TA", L"TARestartOnHang", 0);
+			m_Options.TARestartOnHang = ini->ReadInteger(L"TA", L"TARestartOnHang", 1);
 			// close ini file
 			delete ini;
 			StatusbarError(L"Configuration loaded", 2);
@@ -1363,7 +1363,9 @@ void __fastcall TFormTAHelper::FormShow(TObject *Sender)
 	if(Boot) { // startup init
 		LoadOptionsGlobal();
 
-		UnicodeString filename(GetLastConfig()); // get last config file
+		UnicodeString filename(ParamStr(1)); // get config file from command line
+		if (!filename.Length())
+			filename = GetLastConfig(); // get last config file
 		if (!filename.Length())
 			filename = ProgramDir() + L"Default.tah"; // default config file
 		LoadOptions(filename);
