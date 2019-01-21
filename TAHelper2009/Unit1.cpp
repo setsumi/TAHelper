@@ -1545,46 +1545,78 @@ HWND TFormTAHelper::TALFind(bool forcefind, bool notimer)
 	HWND hw0 = (HWND)LabelTALstatus->Tag; // old value
 	HWND hw = FindWindow(TA_WCLASS, NULL);
 	if (hw != NULL) hw = GetAncestor(hw, GA_ROOT); // new value
-	if (hw != NULL && hw != hw0) RefreshClipboardMonitor();
+	if (hw != NULL && hw != hw0) {
+		RefreshClipboardMonitor();
+		// store TA exe path
+		DWORD processID = 0;
+		HANDLE processHandle = NULL;
+		TCHAR filename[MAX_PATH];
+		if (GetWindowThreadProcessId(hw, &processID)) {
+			processHandle = OpenProcess(PROCESS_QUERY_INFORMATION|PROCESS_VM_READ, FALSE, processID);
+			if (processHandle != NULL) {
+				if (GetModuleFileNameEx(processHandle, NULL, filename, MAX_PATH)) {
+					m_TAexe = filename;
+				}
+				CloseHandle(processHandle);
+			}
+		}
+	}
 	if (forcefind || hw != hw0) TALResult(hw); // assign and display result
 
 	// monitor TA
 	if (CheckBoxTARestartOnHang->Checked) {
-		if (hw == NULL) {
-			if (!m_TAexe.IsEmpty()) { // restart on termination
-				UnicodeString tadir(ExtractFilePath(m_TAexe));
-				tadir = tadir.Delete(tadir.Length(), 1); // remove last separator
-				STARTUPINFO si;
-				PROCESS_INFORMATION pi;
-				ZeroMemory(&si, sizeof(si));
-				si.cb = sizeof(si);
-				ZeroMemory(&pi, sizeof(pi));
-				if (CreateProcess(m_TAexe.c_str(), NULL, NULL, NULL, FALSE, 0, NULL,
-						tadir.c_str(), &si, &pi)) {
-					CloseHandle(pi.hThread);
-					CloseHandle(pi.hProcess);
+		if (hw == NULL) { // restart TA on termination
+			if (!m_TAexe.IsEmpty()) {
+				// but check for running process first (compiling dictionaries while no window yet)
+				bool tarunning = false;
+				HANDLE hProcSnap = NULL;
+				PROCESSENTRY32 pe32;
+				pe32.dwSize = sizeof(pe32);
+
+				hProcSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+				if (hProcSnap == INVALID_HANDLE_VALUE) {
+					throw Exception(L"TFormTAHelper::TALFind() : CreateToolhelp32Snapshot() failed");
+				}
+				if (!Process32First(hProcSnap, &pe32)) {
+					CloseHandle(hProcSnap);
+					throw Exception(L"TFormTAHelper::TALFind() : Process32First() failed");
+				}
+				do {
+					// get full exe path
+					HANDLE processHandle = NULL;
+					TCHAR filename[MAX_PATH];
+					processHandle = OpenProcess(PROCESS_QUERY_INFORMATION|PROCESS_VM_READ, FALSE, pe32.th32ProcessID);
+					if (processHandle != NULL) {
+						if (GetModuleFileNameEx(processHandle, NULL, filename, MAX_PATH)) {
+							if (m_TAexe.CompareIC(filename) == 0) {
+								tarunning = true;
+								CloseHandle(processHandle);
+								break;
+							}
+						}
+						CloseHandle(processHandle);
+					}
+				} while (Process32Next(hProcSnap, &pe32));
+				CloseHandle(hProcSnap);
+
+				if (!tarunning) { // launch TA process
+					UnicodeString tadir(ExtractFilePath(m_TAexe));
+					tadir = tadir.Delete(tadir.Length(), 1); // remove last separator
+					STARTUPINFO si;
+					PROCESS_INFORMATION pi;
+					ZeroMemory(&si, sizeof(si));
+					si.cb = sizeof(si);
+					ZeroMemory(&pi, sizeof(pi));
+					if (CreateProcess(m_TAexe.c_str(), NULL, NULL, NULL, FALSE, 0, NULL,
+							tadir.c_str(), &si, &pi)) {
+						CloseHandle(pi.hThread);
+						CloseHandle(pi.hProcess);
+					}
 				}
 			}
 		} else {
-			if (IsHungAppWindow(hw)) { // terminate TA if hung
+			if (IsHungAppWindow(hw)) { // terminate TA window if hung
 				TerminateProcess(hw);
-			} else {
-				// store TA exe path
-				if (hw != hw0) {
-					DWORD processID = 0;
-					HANDLE processHandle = NULL;
-					TCHAR filename[MAX_PATH];
-
-					if (GetWindowThreadProcessId(hw, &processID)) {
-						processHandle = OpenProcess(PROCESS_QUERY_INFORMATION|PROCESS_VM_READ, FALSE, processID);
-						if (processHandle != NULL) {
-							if (GetModuleFileNameEx(processHandle, NULL, filename, MAX_PATH)) {
-								m_TAexe = filename;
-							}
-							CloseHandle(processHandle);
-						}
-					}
-				}
 			}
 		}
 	}
