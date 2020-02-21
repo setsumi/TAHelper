@@ -285,7 +285,7 @@ object FormTAHelper: TFormTAHelper
     Height = 242
     Anchors = [akLeft, akTop, akRight, akBottom]
     Caption = 'Clipboard Reviser'
-    TabOrder = 0
+    TabOrder = 1
     OnMouseDown = FormMouseDown
     DesignSize = (
       509
@@ -1509,7 +1509,7 @@ object FormTAHelper: TFormTAHelper
     Height = 54
     Anchors = [akLeft, akBottom]
     Caption = 'Hot-Keys'
-    TabOrder = 2
+    TabOrder = 0
     OnMouseDown = FormMouseDown
     DesignSize = (
       303
@@ -1528,7 +1528,7 @@ object FormTAHelper: TFormTAHelper
       ParentFont = False
       ParentShowHint = False
       ShowHint = False
-      TabOrder = 0
+      TabOrder = 1
       OnClick = CheckBoxHKenableClick
     end
     object MemoHKhotkeys: TMemo
@@ -1570,8 +1570,9 @@ object FormTAHelper: TFormTAHelper
       ReadOnly = True
       ScrollBars = ssVertical
       ShowHint = False
-      TabOrder = 1
+      TabOrder = 0
       WordWrap = False
+      OnContextPopup = MemoHKhotkeysContextPopup
     end
   end
   object GroupBoxTA: TGroupBox
@@ -1581,7 +1582,7 @@ object FormTAHelper: TFormTAHelper
     Height = 33
     Anchors = [akLeft, akBottom]
     Caption = 'Translation Aggregator'
-    TabOrder = 1
+    TabOrder = 2
     OnMouseDown = FormMouseDown
     object LabelTALstatus: TLabel
       Left = 8

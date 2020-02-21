@@ -1364,6 +1364,8 @@ void __fastcall TFormTAHelper::FormShow(TObject *Sender)
 		LoadOptionsGlobal();
 
 		UnicodeString filename(ParamStr(1)); // get config file from command line
+		if (filename.Length() && !filename.Pos(L":"))
+			filename = ProgramDir() + filename;
 		if (!filename.Length())
 			filename = GetLastConfig(); // get last config file
 		if (!filename.Length())
@@ -2850,5 +2852,16 @@ void __fastcall TFormTAHelper::ToggleTaskbarVisibility1Click(TObject *Sender)
 		}
 	}
 }
+
 //---------------------------------------------------------------------------
+void __fastcall TFormTAHelper::MemoHKhotkeysContextPopup(TObject *Sender, TPoint &MousePos,
+					bool &Handled)
+{
+	Handled = true;
+	FormTAHelper->PopupMenuForm->Popup(FormTAHelper->Left, FormTAHelper->Top);
+}
+
+//---------------------------------------------------------------------------
+
+
 

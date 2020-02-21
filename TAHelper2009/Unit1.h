@@ -1006,6 +1006,10 @@ __published:	// IDE-managed Components
 	void __fastcall WaKan1Click(TObject *Sender);
 	void __fastcall TimerWDredrawTimer(TObject *Sender);
 	void __fastcall ToggleTaskbarVisibility1Click(TObject *Sender);
+	void __fastcall MemoHKhotkeysContextPopup(TObject *Sender, TPoint &MousePos, bool &Handled);
+
+
+
 
 private:	// User declarations
 public:		// User declarations
