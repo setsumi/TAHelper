@@ -1,3 +1,28 @@
+v1.1.5.8
+- if config file specified in command line is without full path assume program's folder
+- made program's main popup menu also appear by pressing ContexMenu/Shift+F10 key(s) right after program start (i.e. inside Hot Key panel help memo)
+
+v1.1.5.7
+- fixed TA exe path detection, now regardless of "restart TA" option
+- fixed mistakenly restarting TA when its process is alreadt running but without window yet
+
+v1.1.5.6
+- auto restart TA option is enabled by default
+- added command line argument to load specified profile (strictly full path)
+
+v1.1.5.5
+- restart TA on hang or crash
+- reposition freshly detected TA window
+
+v1.1.5.4
+- added text volume limit
+- added option to make taskbar invisible (as addition to autohide)
+- made copy displayed text even if no text (clear clipboard)
+- preliminary support for restarting TA on crash and terminating/restarting on hang (planned for next version)
+
+0.0.0.0
+(Missed some updates)
+
 1.1.5.2
 * Fixed: "Separate name" option removed name instead of separation if corresponding replacement string is not present.
 
