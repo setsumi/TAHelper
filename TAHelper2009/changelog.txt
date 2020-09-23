@@ -1,3 +1,6 @@
+v1.1.5.9
+- ignore non text clipboard
+
 v1.1.5.8
 - if config file specified in command line is without full path assume program's folder
 - made program's main popup menu also appear by pressing ContexMenu/Shift+F10 key(s) right after program start (i.e. inside Hot Key panel help memo)

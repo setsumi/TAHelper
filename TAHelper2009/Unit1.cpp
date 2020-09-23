@@ -415,8 +415,12 @@ void __fastcall TFormTAHelper::WndProc(Messages::TMessage &Message)
 		}
 		return;
 	case WM_DRAWCLIPBOARD:
+		if (!IsClipboardFormatAvailable(CF_UNICODETEXT) && !IsClipboardFormatAvailable(CF_TEXT)) {
+			SendMessage(m_hNextClipboardListener, WM_DRAWCLIPBOARD, 0, 0);
+		}
+		else
 		{
-    	if(Boot) return; // block if program starting - not initialized properly yet
+			if(Boot) return; // block if program starting - not initialized properly yet
 			HWND hWndOwner = GetClipboardOwner();
 			HWND hWndAncestor = hWndOwner? GetAncestor(hWndOwner, GA_ROOT): NULL;
 			// block text from TA
